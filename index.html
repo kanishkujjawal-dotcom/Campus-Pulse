@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Pulse 🎓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.min.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════
+       DESIGN SYSTEM
+    ═══════════════════════════════════════════════════ */
+    :root {
+      --bg-base:        #0d0f14;
+      --bg-surface:     #13161e;
+      --bg-card:        #181c27;
+      --bg-card-hover:  #1e2335;
+      --bg-input:       #1a1e2b;
+      --border:         #252b3b;
+      --border-light:   #2e3650;
+
+      --primary:        #6c63ff;
+      --primary-glow:   rgba(108,99,255,.25);
+      --primary-dark:   #4e47cc;
+      --accent:         #ff6584;
+      --accent-cyan:    #00d4ff;
+      --accent-green:   #00e5a0;
+      --accent-amber:   #ffb347;
+
+      --text-primary:   #e8ecf4;
+      --text-secondary: #8892a8;
+      --text-muted:     #4e5872;
+
+      --radius-sm:  8px;
+      --radius-md:  14px;
+      --radius-lg:  20px;
+      --radius-xl:  28px;
+      --radius-full: 9999px;
+
+      --shadow-sm:  0 2px 8px rgba(0,0,0,.3);
+      --shadow-md:  0 8px 32px rgba(0,0,0,.4);
+      --shadow-lg:  0 16px 64px rgba(0,0,0,.5);
+      --shadow-glow: 0 0 40px var(--primary-glow);
+
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       NOISE TEXTURE OVERLAY
+    ═══════════════════════════════════════════════════ */
+    body::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none;
+      z-index:0;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: var(--radius-full); }
+
+    /* ═══════════════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════════════ */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       TOP BAR
+    ═══════════════════════════════════════════════════ */
+    .topbar {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 64px;
+      background: rgba(19,22,30,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text-primary), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .date-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: .78rem;
+      color: var(--text-secondary);
+    }
+
+    .dot-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse-ring 1.5s ease infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,160,.4); }
+      50%       { box-shadow: 0 0 0 5px rgba(0,229,160,.0); }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════ */
+    .sidebar {
+      background: rgba(19,22,30,.6);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+
+    .sidebar-section-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 12px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition);
+      color: var(--text-secondary);
+      font-size: .88rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(108,99,255,.18), rgba(108,99,255,.06));
+      border-color: rgba(108,99,255,.3);
+      color: var(--primary);
+    }
+
+    .nav-item .nav-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: .7;
+    }
+
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto;
+      min-width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+    }
+
+    .nav-badge.urgent { background: var(--accent); }
+    .nav-badge.today  { background: var(--accent-amber); color: #1a1000; }
+
+    /* ═══════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════ */
+    .main {
+      padding: 28px 32px;
+      overflow-y: auto;
+      max-height: calc(100vh - 64px);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       PAGE SECTIONS (shown/hidden via JS)
+    ═══════════════════════════════════════════════════ */
+    .page { display: none; flex-direction: column; gap: 24px; }
+    .page.active { display: flex; }
+
+    /* ═══════════════════════════════════════════════════
+       SECTION HEADER
+    ═══════════════════════════════════════════════════ */
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      font-size: .88rem;
+      margin-top: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       STAT CARDS (Dashboard)
+    ═══════════════════════════════════════════════════ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .stat-label {
+      font-size: .8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Color variants */
+    .c-purple { color: var(--primary); }
+    .c-red    { color: var(--accent); }
+    .c-amber  { color: var(--accent-amber); }
+    .c-green  { color: var(--accent-green); }
+    .c-cyan   { color: var(--accent-cyan); }
+
+    .bg-purple { background: rgba(108,99,255,.15); }
+    .bg-red    { background: rgba(255,101,132,.15); }
+    .bg-amber  { background: rgba(255,179,71,.15); }
+    .bg-green  { background: rgba(0,229,160,.15); }
+    .bg-cyan   { background: rgba(0,212,255,.15); }
+
+    /* ═══════════════════════════════════════════════════
+       PASTE & EXTRACT PANEL
+    ═══════════════════════════════════════════════════ */
+    .paste-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .paste-panel-header {
+      padding: 20px 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .paste-panel-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), #9b8dff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .paste-panel-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .paste-panel-desc {
+      font-size: .82rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .paste-area {
+      margin: 20px 24px 0;
+      width: calc(100% - 48px);
+      min-height: 150px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: .92rem;
+      line-height: 1.7;
+      padding: 16px;
+      resize: vertical;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    .paste-area::placeholder { color: var(--text-muted); }
+
+    .paste-area:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .paste-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .char-count {
+      font-size: .78rem;
+      color: var(--text-muted);
+    }
+
+    .paste-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(108,99,255,.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(108,99,255,.5);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════════
+       AI RESULT PANEL
+    ═══════════════════════════════════════════════════ */
+    .result-panel {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      animation: slideUp .35s cubic-bezier(.4,0,.2,1);
+    }
+
+    .result-panel.visible { display: block; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-panel-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, rgba(108,99,255,.2), rgba(0,212,255,.1));
+      border: 1px solid rgba(108,99,255,.3);
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .result-extracted {
+      padding: 24px;
+      border-right: 1px solid var(--border);
+    }
+
+    .result-summary {
+      padding: 24px;
+    }
+
+    .result-section-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-label {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .field-value {
+      font-size: .92rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .field-value.big {
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+    }
+
+    .summary-text {
+      font-size: .9rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    .summary-highlight {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .result-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       CATEGORY BADGE / STATUS BADGE
+    ═══════════════════════════════════════════════════ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .badge-academic   { background: rgba(108,99,255,.2); color: var(--primary); border: 1px solid rgba(108,99,255,.3); }
+    .badge-event      { background: rgba(255,101,132,.2); color: var(--accent); border: 1px solid rgba(255,101,132,.3); }
+    .badge-sports     { background: rgba(0,229,160,.2); color: var(--accent-green); border: 1px solid rgba(0,229,160,.3); }
+    .badge-club       { background: rgba(255,179,71,.2); color: var(--accent-amber); border: 1px solid rgba(255,179,71,.3); }
+    .badge-notice     { background: rgba(0,212,255,.2); color: var(--accent-cyan); border: 1px solid rgba(0,212,255,.3); }
+    .badge-other      { background: rgba(78,88,114,.2); color: var(--text-secondary); border: 1px solid var(--border); }
+    .badge-workshop   { background: rgba(180,120,255,.2); color: #c084fc; border: 1px solid rgba(180,120,255,.3); }
+    .badge-exam       { background: rgba(255,90,90,.2); color: #ff6b6b; border: 1px solid rgba(255,90,90,.3); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      font-size: .7rem;
+      font-weight: 700;
+    }
+
+    .status-urgent   { background: rgba(255,101,132,.15); color: var(--accent); border: 1px solid rgba(255,101,132,.4); }
+    .status-today    { background: rgba(255,179,71,.15); color: var(--accent-amber); border: 1px solid rgba(255,179,71,.4); }
+    .status-upcoming { background: rgba(108,99,255,.15); color: var(--primary); border: 1px solid rgba(108,99,255,.3); }
+    .status-expired  { background: rgba(78,88,114,.12); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* ═══════════════════════════════════════════════════
+       EVENT CARDS
+    ═══════════════════════════════════════════════════ */
+    .events-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: .9rem;
+      padding: 10px 16px 10px 40px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .search-box input:focus { border-color: var(--primary); }
+    .search-box input::placeholder { color: var(--text-muted); }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      transition: all var(--transition);
+    }
+
+    .filter-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .filter-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 3px;
+    }
+
+    .view-btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+    }
+
+    .view-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       EVENTS LIST
+    ═══════════════════════════════════════════════════ */
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .event-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      transition: all var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--primary);
+      border-radius: 3px 0 0 3px;
+      transition: width var(--transition);
+    }
+
+    .event-card.urgent::before { background: var(--accent); }
+    .event-card.today::before  { background: var(--accent-amber); }
+    .event-card.expired::before { background: var(--text-muted); opacity: .4; }
+
+    .event-card:hover {
+      border-color: var(--border-light);
+      background: var(--bg-card-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .event-card:hover::before { width: 5px; }
+
+    .event-date-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 6px;
+      flex-shrink: 0;
+    }
+
+    .event-date-day {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .event-date-month {
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+      margin-top: 2px;
+    }
+
+    .event-body { flex: 1; min-width: 0; }
+
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .event-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-card.expired .event-title { opacity: .5; }
+
+    .event-detail-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .event-detail {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .8rem;
+      color: var(--text-secondary);
+    }
+
+    .event-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 14px;
+    }
+
+    .icon-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .icon-btn.delete:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       CALENDAR VIEW
+    ═══════════════════════════════════════════════════ */
+    .calendar-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calendar-month-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-day-header {
+      text-align: center;
+      padding: 10px;
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cal-day {
+      min-height: 90px;
+      padding: 8px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+      cursor: default;
+    }
+
+    .cal-day:nth-child(7n) { border-right: none; }
+
+    .cal-day.other-month { opacity: .3; }
+
+    .cal-day.today-cell {
+      background: rgba(108,99,255,.06);
+    }
+
+    .cal-day-num {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+    }
+
+    .cal-day.today-cell .cal-day-num {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .cal-events {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 4px;
+    }
+
+    .cal-event-dot {
+      font-size: .68rem;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+
+    .cal-event-dot.upcoming { background: rgba(108,99,255,.25); color: var(--primary); }
+    .cal-event-dot.today    { background: rgba(255,179,71,.25); color: var(--accent-amber); }
+    .cal-event-dot.urgent   { background: rgba(255,101,132,.25); color: var(--accent); }
+    .cal-event-dot.expired  { background: rgba(78,88,114,.15); color: var(--text-muted); }
+
+    /* ═══════════════════════════════════════════════════
+       TODAY HIGHLIGHT PANEL
+    ═══════════════════════════════════════════════════ */
+    .today-panel {
+      background: linear-gradient(135deg, rgba(108,99,255,.12), rgba(0,212,255,.06));
+      border: 1px solid rgba(108,99,255,.25);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+    }
+
+    .today-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .today-label {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .today-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .today-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .today-item:hover { background: rgba(255,255,255,.06); }
+
+    .today-item-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════════ */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      opacity: .4;
+    }
+
+    .empty-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .empty-sub {
+      font-size: .85rem;
+      color: var(--text-muted);
+      max-width: 300px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       API KEY SETUP MODAL
+    ═══════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn .2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: scaleIn .25s cubic-bezier(.4,0,.2,1);
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(.94); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      color: var(--text-secondary);
+      font-size: .88rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-sub a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .modal-sub a:hover { text-decoration: underline; }
+
+    .modal-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: .9rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color var(--transition);
+      margin-bottom: 16px;
+    }
+
+    .modal-input:focus { border-color: var(--primary); }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .info-box {
+      background: rgba(108,99,255,.1);
+      border: 1px solid rgba(108,99,255,.2);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: .82rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+    ═══════════════════════════════════════════════════ */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9999;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-md);
+      font-size: .88rem;
+      font-weight: 500;
+      max-width: 360px;
+      animation: toastIn .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    .toast.success { border-color: rgba(0,229,160,.3); }
+    .toast.error   { border-color: rgba(255,101,132,.3); }
+    .toast.info    { border-color: rgba(108,99,255,.3); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       EVENT DETAIL MODAL
+    ═══════════════════════════════════════════════════ */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .detail-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-field-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .detail-field-value {
+      font-size: .95rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .detail-summary-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-size: .88rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       DASHBOARD RECENT / UPCOMING SECTION
+    ═══════════════════════════════════════════════════ */
+    .dashboard-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .dash-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .dash-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dash-panel-title {
+      font-family: var(--font-display);
+      font-size: .95rem;
+      font-weight: 700;
+    }
+
+    .dash-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .dash-item:last-child { border-bottom: none; }
+    .dash-item:hover { background: var(--bg-card-hover); }
+
+    .dash-item-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dash-item-text { flex: 1; min-width: 0; }
+
+    .dash-item-name {
+      font-size: .88rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dash-item-sub {
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       AMBIENT GRADIENT BLOBS
+    ═══════════════════════════════════════════════════ */
+    .ambient {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: .07;
+    }
+
+    .ambient-1 {
+      width: 600px;
+      height: 600px;
+      background: var(--primary);
+      top: -200px;
+      right: -100px;
+    }
+
+    .ambient-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--accent);
+      bottom: -200px;
+      left: 100px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       AI ASSISTANT CHAT
+    ═══════════════════════════════════════════════════ */
+    .chat-wrap {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 160px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-bubble {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: slideUp .25s ease;
+    }
+
+    .chat-bubble.user { flex-direction: row-reverse; }
+
+    .chat-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .chat-avatar.ai   { background: linear-gradient(135deg, var(--primary), #9b8dff); }
+    .chat-avatar.user { background: var(--bg-input); border: 1px solid var(--border); }
+
+    .chat-text {
+      max-width: 72%;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: .9rem;
+      line-height: 1.7;
+    }
+
+    .chat-bubble.ai .chat-text {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-top-left-radius: 4px;
+    }
+
+    .chat-bubble.user .chat-text {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-top-right-radius: 4px;
+    }
+
+    .chat-time {
+      font-size: .68rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .chat-bubble.user .chat-time { text-align: right; }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: .92rem;
+      padding: 11px 16px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .chat-input:focus { border-color: var(--primary); }
+    .chat-input::placeholder { color: var(--text-muted); }
+
+    .chat-send-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .chat-send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(108,99,255,.4); }
+    .chat-send-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .chat-suggestions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 0 20px 14px;
+      background: var(--bg-surface);
+    }
+
+    .suggestion-chip {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .suggestion-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(108,99,255,.08);
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .typing-dots span {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: dotBounce 1.2s ease infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: .2s; }
+    .typing-dots span:nth-child(3) { animation-delay: .4s; }
+
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: .4; }
+      40%            { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-row { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .result-extracted { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+
+      .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        top: auto;
+        flex-direction: row;
+        padding: 8px 12px;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        z-index: 90;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 4px;
+        justify-content: space-around;
+      }
+
+      .sidebar-section-label { display: none; }
+
+      .nav-item {
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 12px;
+        font-size: .68rem;
+        text-align: center;
+        min-width: 60px;
+      }
+
+      .nav-badge { display: none; }
+
+      .main {
+        padding: 20px 16px 100px;
+      }
+
+      .topbar { padding: 0 16px; }
+
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+      .section-title { font-size: 1.3rem; }
+
+      .cal-day { min-height: 60px; }
+
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .paste-controls { flex-direction: column; align-items: flex-start; }
+      .events-toolbar { flex-direction: column; align-items: stretch; }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       MISC UTILITIES
+    ═══════════════════════════════════════════════════ */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      width: 100%;
+    }
+
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .text-sm { font-size: .82rem; }
+
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .ml-auto { margin-left: auto; }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.5s ease infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes shimmer {
+      from { background-position: 100% 0; }
+      to   { background-position: -100% 0; }
+    }
+  
+    
+  </style>
+</head>
+<body>
+
+<!-- Ambient blobs -->
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<!-- ═══ API KEY MODAL ═══ -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">🔑 Set Up AI Engine</div>
+    <p class="modal-sub">
+      Campus Pulse uses <strong>Google Gemini AI</strong> to extract and summarize notices.
+      Enter your free API key to enable smart parsing.<br/><br/>
+      Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> — no credit card needed.
+    </p>
+    <div class="info-box">
+      🔒 Your API key is stored only in your browser's localStorage and never sent anywhere except directly to Google's API.
+    </div>
+    <input type="password" class="modal-input" id="apiKeyInput" placeholder="AIzaSy..." autocomplete="off" />
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="skipApiKey()">Skip for now</button>
+      <button class="btn btn-primary" onclick="saveApiKey()">
+        <span>✦</span> Activate AI
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EVENT DETAIL MODAL ═══ -->
+<div class="modal-overlay hidden" id="detailModal">
+  <div class="modal" style="max-width:580px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div id="dm-category" style="margin-bottom:8px"></div>
+        <div id="dm-title" style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;"></div>
+      </div>
+      <button class="icon-btn" onclick="closeDetailModal()" style="font-size:18px">✕</button>
+    </div>
+    <div class="detail-grid" id="dm-grid"></div>
+    <div style="margin-bottom:8px;font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">AI Summary</div>
+    <div class="detail-summary-box" id="dm-summary"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeDetailModal()">Close</button>
+      <button class="btn btn-primary" id="dm-delete" onclick="">🗑 Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LAYOUT ═══ -->
+<div class="layout">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a class="logo" href="#">
+      <div class="logo-icon">🎓</div>
+      <span class="logo-text">Campus Pulse</span>
+    </a>
+    <div class="topbar-right">
+      <div class="date-chip">
+        <div class="dot-pulse"></div>
+        <span id="live-date"></span>
+      </div>
+      <button class="btn btn-ghost" style="padding:8px 14px;font-size:.82rem;" onclick="openApiModal()">
+        🔑 API Key
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR / BOTTOM NAV -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Navigation</div>
+    <div class="nav-item active" data-page="dashboard" onclick="navigate(this,'dashboard')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+      <span class="nav-badge" id="nav-badge-dash">0</span>
+    </div>
+    <div class="nav-item" data-page="paste" onclick="navigate(this,'paste')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      <span>Smart Paste</span>
+    </div>
+    <div class="nav-item" data-page="events" onclick="navigate(this,'events')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/><polyline points="9 11 12 14 15 11"/></svg>
+      <span>All Events</span>
+      <span class="nav-badge" id="nav-badge-events">0</span>
+    </div>
+    <div class="nav-item" data-page="calendar" onclick="navigate(this,'calendar')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Calendar</span>
+    </div>
+    <div class="nav-item" data-page="assistant" onclick="navigate(this,'assistant')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>AI Assistant</span>
+    </div>
+    <div class="divider" style="margin:8px 0;"></div>
+    <div class="sidebar-section-label">Quick Filter</div>
+    <div class="nav-item" onclick="navigateFiltered('urgent')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Urgent</span>
+      <span class="nav-badge urgent" id="badge-urgent">0</span>
+    </div>
+    <div class="nav-item" onclick="navigateFiltered('today')">
+      <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Today</span>
+      <span class="nav-badge today" id="badge-today">0</span>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ═══ DASHBOARD PAGE ═══ -->
+    <section class="page active" id="page-dashboard">
+
+      <!-- Today highlight -->
+      <div class="today-panel" id="today-panel">
+        <div class="today-panel-header">
+          <span style="font-size:1.4rem;">📅</span>
+          <div>
+            <div class="today-label">Today's Agenda</div>
+            <div style="font-size:.8rem;color:var(--text-muted);" id="today-date-label"></div>
+          </div>
+        </div>
+        <div class="today-items" id="today-items">
+          <div class="empty-state" style="padding:20px">
+            <div class="empty-icon">✨</div>
+            <div class="empty-title" style="font-size:.9rem;">All clear today!</div>
+            <div class="empty-sub" style="font-size:.78rem;">No events for today. Paste a notice to add one.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card" onclick="navigate(document.querySelector('[data-page=events]'),'events')">
+          <div class="stat-card-top">
+            <div class="stat-icon bg-purple" style="font-size:18px;">📋</div>
+          </div>
+          <div class="stat-value c-purple" id="stat-total">0</div>
+          <div class="stat-label">Total Notices</div>
+        </div>
+        <div class="stat-card" onclick="navigateFiltered('urgent')">
+          <div class="stat-card-top">
+            <div class="stat-icon bg-red" style="font-size:18px;">🚨</div>
+          </div>
+          <div class="stat-value c-red" id="stat-urgent">0</div>
+          <div class="stat-label">Urgent Items</div>
+        </div>
+        <div class="stat-card" onclick="navigateFiltered('upcoming')">
+          <div class="stat-card-top">
+            <div class="stat-icon bg-cyan" style="font-size:18px;">⏳</div>
+          </div>
+          <div class="stat-value c-cyan" id="stat-upcoming">0</div>
+          <div class="stat-label">Upcoming</div>
+        </div>
+        <div class="stat-card" onclick="navigateFiltered('expired')">
+          <div class="stat-card-top">
+            <div class="stat-icon bg-amber" style="font-size:18px;">✅</div>
+          </div>
+          <div class="stat-value c-amber" id="stat-expired">0</div>
+          <div class="stat-label">Past Events</div>
+        </div>
+      </div>
+
+      <!-- Dashboard row -->
+      <div class="dashboard-row">
+        <div class="dash-panel">
+          <div class="dash-panel-header">
+            <div class="dash-panel-title">🚨 Urgent &amp; Today</div>
+            <button class="btn btn-ghost" style="padding:5px 12px;font-size:.78rem;" onclick="navigate(document.querySelector('[data-page=events]'),'events')">View all →</button>
+          </div>
+          <div id="dash-urgent-list">
+            <div class="empty-state" style="padding:30px">
+              <div class="empty-icon">🎉</div>
+              <div class="empty-title" style="font-size:.88rem;">Nothing urgent!</div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <div class="dash-panel-header">
+            <div class="dash-panel-title">📅 Upcoming This Week</div>
+            <button class="btn btn-ghost" style="padding:5px 12px;font-size:.78rem;" onclick="navigate(document.querySelector('[data-page=calendar]'),'calendar')">Calendar →</button>
+          </div>
+          <div id="dash-upcoming-list">
+            <div class="empty-state" style="padding:30px">
+              <div class="empty-icon">📭</div>
+              <div class="empty-title" style="font-size:.88rem;">Nothing this week yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══ SMART PASTE PAGE ═══ -->
+    <section class="page" id="page-paste">
+      <div class="section-header">
+        <div>
+          <div class="section-title">✦ Smart Paste</div>
+          <div class="section-subtitle">Paste any messy notice — WhatsApp forward, email, poster caption — and AI will extract the details.</div>
+        </div>
+      </div>
+
+      <div class="paste-panel">
+        <div class="paste-panel-header">
+          <div class="paste-panel-icon">✦</div>
+          <div>
+            <div class="paste-panel-title">Paste Your Notice</div>
+            <div class="paste-panel-desc">Works with WhatsApp messages, emails, event captions, posters, announcements…</div>
+          </div>
+        </div>
+        <textarea class="paste-area" id="pasteInput" placeholder="Paste anything here…&#10;&#10;Example:&#10;Hey everyone!! Reminder that the Annual Tech Fest TECHNOVA is happening this Saturday 1st November from 10am to 5pm at the Main Auditorium. Register ASAP! Categories: Hackathon, Quiz, Robotics. Last date to register: 31st Oct midnight. Don't miss it 🔥🔥" oninput="updateCharCount()"></textarea>
+        <div class="paste-controls">
+          <span class="char-count" id="char-count">0 characters</span>
+          <div class="paste-actions">
+            <button class="btn btn-secondary" onclick="clearPaste()">Clear</button>
+            <button class="btn btn-primary" id="extractBtn" onclick="extractNotice()">
+              <span>✦</span> Extract with AI
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result panel -->
+      <div class="result-panel" id="resultPanel">
+        <div class="result-panel-header">
+          <div class="result-panel-title">
+            ✅ Extracted Details
+            <span class="ai-badge">✦ AI Parsed</span>
+          </div>
+          <button class="icon-btn" onclick="closeResult()">✕</button>
+        </div>
+        <div class="result-grid">
+          <div class="result-extracted">
+            <div class="result-section-label">📌 Event Fields</div>
+            <div class="field-row" id="field-row">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+          <div class="result-summary">
+            <div class="result-section-label">✦ AI Summary</div>
+            <div class="summary-text" id="summary-text"></div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-secondary" onclick="closeResult()">Discard</button>
+          <button class="btn btn-primary" onclick="saveExtracted()">
+            📌 Save to Campus Pulse
+          </button>
+        </div>
+      </div>
+
+      <!-- Example notices -->
+      <div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;">Try these example notices ↓</div>
+        <div style="display:flex;flex-direction:column;gap:10px;" id="examples-list"></div>
+      </div>
+    </section>
+
+    <!-- ═══ EVENTS PAGE ═══ -->
+    <section class="page" id="page-events">
+      <div class="section-header">
+        <div>
+          <div class="section-title">All Events</div>
+          <div class="section-subtitle">Your complete notice board — searchable, filterable, and always up to date.</div>
+        </div>
+        <button class="btn btn-primary" onclick="navigate(document.querySelector('[data-page=paste]'),'paste')">
+          + Add Notice
+        </button>
+      </div>
+
+      <div class="events-toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search events, venues, categories…" oninput="renderEvents()" />
+        </div>
+        <div class="filter-group" id="category-filters">
+          <button class="filter-chip active" data-cat="all" onclick="setFilter(this,'all')">All</button>
+          <button class="filter-chip" data-cat="Academic" onclick="setFilter(this,'Academic')">Academic</button>
+          <button class="filter-chip" data-cat="Event" onclick="setFilter(this,'Event')">Events</button>
+          <button class="filter-chip" data-cat="Sports" onclick="setFilter(this,'Sports')">Sports</button>
+          <button class="filter-chip" data-cat="Club" onclick="setFilter(this,'Club')">Clubs</button>
+          <button class="filter-chip" data-cat="Workshop" onclick="setFilter(this,'Workshop')">Workshop</button>
+          <button class="filter-chip" data-cat="Exam" onclick="setFilter(this,'Exam')">Exams</button>
+          <button class="filter-chip" data-cat="Notice" onclick="setFilter(this,'Notice')">Notices</button>
+        </div>
+        <div class="filter-group">
+          <button class="filter-chip" data-status="all-status" onclick="setStatusFilter(this,'all')">All Status</button>
+          <button class="filter-chip" data-status="urgent" onclick="setStatusFilter(this,'urgent')">🚨 Urgent</button>
+          <button class="filter-chip" data-status="today" onclick="setStatusFilter(this,'today')">⏰ Today</button>
+          <button class="filter-chip" data-status="upcoming" onclick="setStatusFilter(this,'upcoming')">📅 Upcoming</button>
+          <button class="filter-chip" data-status="expired" onclick="setStatusFilter(this,'expired')">✅ Past</button>
+        </div>
+      </div>
+
+      <div class="events-list" id="events-list">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <!-- ═══ CALENDAR PAGE ═══ -->
+    <section class="page" id="page-calendar">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Calendar View</div>
+          <div class="section-subtitle">See all your events at a glance — color coded by urgency.</div>
+        </div>
+      </div>
+      <div class="calendar-wrapper" id="cal-wrapper">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ═══ AI ASSISTANT PAGE ═══ -->
+    <section class="page" id="page-assistant">
+      <div class="section-header">
+        <div>
+          <div class="section-title">✦ AI Assistant</div>
+          <div class="section-subtitle">Ask anything about your campus events — deadlines, schedules, summaries, what's happening today.</div>
+        </div>
+      </div>
+
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-suggestions">
+          <span class="suggestion-chip" onclick="sendSuggestion(this)">What's happening today?</span>
+          <span class="suggestion-chip" onclick="sendSuggestion(this)">Any urgent deadlines?</span>
+          <span class="suggestion-chip" onclick="sendSuggestion(this)">Summarise this week</span>
+          <span class="suggestion-chip" onclick="sendSuggestion(this)">List all upcoming events</span>
+          <span class="suggestion-chip" onclick="sendSuggestion(this)">Any exams coming up?</span>
+          <span class="suggestion-chip" onclick="sendSuggestion(this)">What should I focus on?</span>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" type="text" placeholder="Ask me about your campus events…" onkeydown="if(event.key==='Enter')sendChat()" />
+          <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()" title="Send">➤</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────────
+   STATE
+──────────────────────────────────────────────── */
+let events = JSON.parse(localStorage.getItem('cp_events') || '[]');
+let currentFilter = 'all';
+let currentStatusFilter = 'all';
+let calendarYear, calendarMonth;
+let pendingExtracted = null;
+const NOW = new Date();
+
+const EXAMPLES = [
+  {
+    label: "🎓 Workshop Notice",
+    text: `Hi all! The Computer Science Department is organising a 2-day workshop on Machine Learning & Deep Learning. Venue: CS Seminar Hall, Block C. Dates: November 5-6, 2026. Timings: 9:30 AM to 4:00 PM. Registration deadline: November 3rd. Limited seats — register at the department office. Bring your laptops!`
+  },
+  {
+    label: "🏆 Sports Event",
+    text: `URGENT ⚠️ Inter-college Cricket Tournament — Our team plays TOMORROW (Nov 1) at 8 AM on the Main Ground. All team members MUST be present by 7:30 AM. Spectators welcome! Go Eagles 🦅`
+  },
+  {
+    label: "📝 Exam Notice",
+    text: `Internal Assessment Test (IAT-2) Schedule — Mathematics: November 10, 10:00 AM, Room 201. Physics: November 11, 2:00 PM, Room 302. Computer Networks: November 12, 10:00 AM, Lab 1. Bring your ID cards. No electronic devices allowed.`
+  },
+  {
+    label: "🎉 Cultural Fest",
+    text: `CULTURAZA 2026 is here! Our annual cultural extravaganza returns. Date: November 15-16. Venue: College Amphitheater & Main Auditorium. Events: Dance, Music, Drama, Fashion Show, Stand-up Comedy. Register for events before November 12. Entry free for all students!`
+  }
+];
+
+/* ────────────────────────────────────────────────
+   HELPERS
+──────────────────────────────────────────────── */
+function saveEvents() {
+  localStorage.setItem('cp_events', JSON.stringify(events));
+  updateBadges();
+  renderDashboard();
+}
+
+function getStatus(event) {
+  if (!event.date) return 'upcoming';
+  const d = parseDate(event.date);
+  if (!d) return 'upcoming';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const evDate = new Date(d); evDate.setHours(0,0,0,0);
+  const diff = Math.floor((evDate - today) / 86400000);
+  if (diff < 0) return 'expired';
+  if (diff === 0) return 'today';
+  if (diff <= 3) return 'urgent';
+  return 'upcoming';
+}
+
+function parseDate(str) {
+  if (!str) return null;
+  // Try ISO
+  let d = new Date(str);
+  if (!isNaN(d)) return d;
+  // Try "5 November 2026", "Nov 5 2026", etc.
+  d = new Date(Date.parse(str));
+  if (!isNaN(d)) return d;
+  return null;
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const d = parseDate(str);
+  if (!d) return str;
+  return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function formatDay(str) {
+  if (!str) return '—';
+  const d = parseDate(str);
+  if (!d) return '—';
+  return d.getDate();
+}
+
+function formatMonth(str) {
+  if (!str) return '';
+  const d = parseDate(str);
+  if (!d) return '';
+  return d.toLocaleDateString('en-IN', { month:'short' });
+}
+
+function categoryClass(cat) {
+  const map = {
+    'Academic':'academic', 'Event':'event', 'Sports':'sports',
+    'Club':'club', 'Notice':'notice', 'Workshop':'workshop', 'Exam':'exam'
+  };
+  return 'badge-' + (map[cat] || 'other');
+}
+
+function catEmoji(cat) {
+  const map = {
+    'Academic':'📚', 'Event':'🎉', 'Sports':'🏆',
+    'Club':'🎯', 'Notice':'📢', 'Workshop':'🛠️', 'Exam':'📝', 'Other':'📌'
+  };
+  return map[cat] || '📌';
+}
+
+function statusLabel(s) {
+  const map = { urgent:'🚨 Urgent', today:'⏰ Today', upcoming:'📅 Upcoming', expired:'✅ Past' };
+  return map[s] || s;
+}
+
+function statusClass(s) {
+  return 'status-' + s;
+}
+
+function getApiKey() {
+  return localStorage.getItem('cp_gemini_key') || '';
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+/* ────────────────────────────────────────────────
+   LIVE DATE
+──────────────────────────────────────────────── */
+function updateLiveDate() {
+  const now = new Date();
+  document.getElementById('live-date').textContent = now.toLocaleDateString('en-IN', {
+    weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'
+  });
+  document.getElementById('today-date-label').textContent = now.toLocaleDateString('en-IN', {
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
+  });
+}
+updateLiveDate();
+setInterval(updateLiveDate, 60000);
+
+/* ────────────────────────────────────────────────
+   NAVIGATION
+──────────────────────────────────────────────── */
+function navigate(el, page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + page);
+  if (pg) pg.classList.add('active');
+
+  if (page === 'events') { currentStatusFilter = 'all'; renderEvents(); }
+  if (page === 'calendar') renderCalendar();
+  if (page === 'dashboard') renderDashboard();
+}
+
+function navigateFiltered(status) {
+  currentStatusFilter = status;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector('[data-page=events]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-events').classList.add('active');
+  // Activate corresponding status chip
+  document.querySelectorAll('[data-status]').forEach(c => c.classList.remove('active'));
+  const chip = document.querySelector(`[data-status="${status}"]`);
+  if (chip) chip.classList.add('active');
+  renderEvents();
+}
+
+/* ────────────────────────────────────────────────
+   API KEY MODAL
+──────────────────────────────────────────────── */
+function openApiModal() {
+  document.getElementById('apiModal').classList.remove('hidden');
+  document.getElementById('apiKeyInput').value = getApiKey();
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (key) {
+    localStorage.setItem('cp_gemini_key', key);
+    showToast('✅ API key saved! AI features are now active.', 'success');
+  }
+  document.getElementById('apiModal').classList.add('hidden');
+}
+
+function skipApiKey() {
+  document.getElementById('apiModal').classList.add('hidden');
+}
+
+// Show modal on first visit if no key set
+if (!getApiKey()) {
+  document.getElementById('apiModal').classList.remove('hidden');
+}
+
+/* ────────────────────────────────────────────────
+   CHAR COUNT
+──────────────────────────────────────────────── */
+function updateCharCount() {
+  const len = document.getElementById('pasteInput').value.length;
+  document.getElementById('char-count').textContent = len.toLocaleString() + ' characters';
+}
+
+function clearPaste() {
+  document.getElementById('pasteInput').value = '';
+  updateCharCount();
+  closeResult();
+}
+
+function closeResult() {
+  document.getElementById('resultPanel').classList.remove('visible');
+  pendingExtracted = null;
+}
+
+/* ────────────────────────────────────────────────
+   FILTERS
+──────────────────────────────────────────────── */
+function setFilter(el, cat) {
+  document.querySelectorAll('[data-cat]').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = cat;
+  renderEvents();
+}
+
+function setStatusFilter(el, status) {
+  document.querySelectorAll('[data-status]').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentStatusFilter = status;
+  renderEvents();
+}
+
+/* ────────────────────────────────────────────────
+   AI EXTRACTION (Gemini)
+──────────────────────────────────────────────── */
+async function extractNotice() {
+  const text = document.getElementById('pasteInput').value.trim();
+  if (!text) { showToast('Please paste some text first!', 'error'); return; }
+
+  const key = getApiKey();
+  if (!key) {
+    showToast('Please set your Gemini API key first.', 'error');
+    openApiModal();
+    return;
+  }
+
+  const btn = document.getElementById('extractBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Extracting…';
+
+  try {
+    const prompt = `You are an AI assistant for a campus notice board app. Extract structured information from the following notice text.
+
+Return a JSON object with EXACTLY these fields (use null if not found):
+{
+  "title": "short descriptive title (max 8 words)",
+  "date": "date in YYYY-MM-DD format if possible, else human-readable string, null if not found",
+  "time": "time string like '10:00 AM' or '10 AM - 5 PM', null if not found",
+  "venue": "location/venue, null if not found",
+  "category": one of ["Academic", "Event", "Sports", "Club", "Workshop", "Exam", "Notice", "Other"],
+  "deadline": "registration/submission deadline in YYYY-MM-DD if found, else null",
+  "summary": "a short, clear, readable 2-3 sentence summary a student would want to read. Use plain english, no bullet points."
+}
+
+Notice text:
+"""
+${text}
+"""
+
+Return ONLY the JSON object, no markdown, no explanation.`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 512 }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+
+    const data = await response.json();
+    let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Strip markdown code fences if present
+    raw = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    const parsed = JSON.parse(raw);
+    pendingExtracted = parsed;
+    showResult(parsed);
+    showToast('✦ AI extraction complete!', 'success');
+
+  } catch (err) {
+    console.error(err);
+    showToast('AI error: ' + err.message, 'error');
+    // Fallback: show manual form
+    pendingExtracted = { title: '', date: null, time: null, venue: null, category: 'Notice', deadline: null, summary: text.slice(0, 200) };
+    showResult(pendingExtracted);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>✦</span> Extract with AI';
+  }
+}
+
+function showResult(data) {
+  const panel = document.getElementById('resultPanel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  const fields = [
+    { label: 'Title', value: data.title || '—', big: true },
+    { label: 'Category', value: data.category || 'Other' },
+    { label: 'Date', value: data.date ? formatDate(data.date) : '—' },
+    { label: 'Time', value: data.time || '—' },
+    { label: 'Venue', value: data.venue || '—' },
+    { label: 'Deadline', value: data.deadline ? formatDate(data.deadline) : '—' },
+  ];
+
+  document.getElementById('field-row').innerHTML = fields.map(f => `
+    <div class="field-item">
+      <div class="field-label">${f.label}</div>
+      <div class="field-value ${f.big ? 'big' : ''}">${f.value}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('summary-text').innerHTML = data.summary
+    ? `<span class="summary-highlight">${data.summary}</span>`
+    : '<span style="color:var(--text-muted)">No summary generated.</span>';
+}
+
+function saveExtracted() {
+  if (!pendingExtracted) return;
+  const ev = {
+    id: uid(),
+    ...pendingExtracted,
+    createdAt: new Date().toISOString(),
+    rawText: document.getElementById('pasteInput').value.trim()
+  };
+  events.unshift(ev);
+  saveEvents();
+  closeResult();
+  clearPaste();
+  showToast('📌 Notice saved to Campus Pulse!', 'success');
+  navigate(document.querySelector('[data-page=events]'), 'events');
+}
+
+/* ────────────────────────────────────────────────
+   EXAMPLES
+──────────────────────────────────────────────── */
+function renderExamples() {
+  document.getElementById('examples-list').innerHTML = EXAMPLES.map((ex, i) => `
+    <div onclick="loadExample(${i})" style="
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius-md);
+      padding:14px 18px;
+      cursor:pointer;
+      transition:all var(--transition);
+      display:flex;
+      align-items:center;
+      gap:12px;
+    " onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--bg-card-hover)'"
+       onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+      <span style="font-size:1.2rem;">${ex.label.split(' ')[0]}</span>
+      <div>
+        <div style="font-size:.88rem;font-weight:600;color:var(--text-primary)">${ex.label.slice(ex.label.indexOf(' ')+1)}</div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:2px;">${ex.text.slice(0,80)}…</div>
+      </div>
+      <span style="margin-left:auto;color:var(--primary);font-size:.8rem;font-weight:600;">Try →</span>
+    </div>
+  `).join('');
+}
+
+function loadExample(i) {
+  document.getElementById('pasteInput').value = EXAMPLES[i].text;
+  updateCharCount();
+  document.getElementById('pasteInput').focus();
+  showToast('Example loaded! Hit "Extract with AI" ✦', 'info');
+}
+
+renderExamples();
+
+/* ────────────────────────────────────────────────
+   RENDER EVENTS LIST
+──────────────────────────────────────────────── */
+function renderEvents() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let filtered = events.filter(ev => {
+    const s = getStatus(ev);
+    const matchSearch = !search ||
+      (ev.title || '').toLowerCase().includes(search) ||
+      (ev.venue || '').toLowerCase().includes(search) ||
+      (ev.category || '').toLowerCase().includes(search) ||
+      (ev.summary || '').toLowerCase().includes(search);
+    const matchCat = currentFilter === 'all' || ev.category === currentFilter;
+    const matchStatus = currentStatusFilter === 'all' || s === currentStatusFilter;
+    return matchSearch && matchCat && matchStatus;
+  });
+
+  const container = document.getElementById('events-list');
+
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No notices found</div>
+        <div class="empty-sub">Try adjusting your filters, or paste a new notice to get started.</div>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="navigate(document.querySelector('[data-page=paste]'),'paste')">+ Paste a Notice</button>
+      </div>`;
+    return;
+  }
+
+  // Sort: urgent/today first, then by date
+  filtered.sort((a, b) => {
+    const order = { urgent: 0, today: 1, upcoming: 2, expired: 3 };
+    const sa = order[getStatus(a)] ?? 4;
+    const sb = order[getStatus(b)] ?? 4;
+    if (sa !== sb) return sa - sb;
+    const da = parseDate(a.date);
+    const db = parseDate(b.date);
+    if (!da && !db) return 0;
+    if (!da) return 1;
+    if (!db) return -1;
+    return da - db;
+  });
+
+  container.innerHTML = filtered.map(ev => {
+    const s = getStatus(ev);
+    return `
+    <div class="event-card ${s}" onclick="openDetail('${ev.id}')">
+      <div class="event-date-block">
+        <div class="event-date-day ${s === 'expired' ? 'text-muted' : s === 'today' ? 'c-amber' : s === 'urgent' ? 'c-red' : 'c-purple'}">${ev.date ? formatDay(ev.date) : '?'}</div>
+        <div class="event-date-month">${ev.date ? formatMonth(ev.date) : '—'}</div>
+      </div>
+      <div class="event-body">
+        <div class="event-meta">
+          <span class="badge ${categoryClass(ev.category)}">${catEmoji(ev.category)} ${ev.category || 'Other'}</span>
+          <span class="status-badge ${statusClass(s)}">${statusLabel(s)}</span>
+        </div>
+        <div class="event-title">${ev.title || 'Untitled Notice'}</div>
+        <div class="event-detail-row">
+          ${ev.time ? `<div class="event-detail">🕐 ${ev.time}</div>` : ''}
+          ${ev.venue ? `<div class="event-detail">📍 ${ev.venue}</div>` : ''}
+          ${ev.deadline ? `<div class="event-detail">⏰ Deadline: ${formatDate(ev.deadline)}</div>` : ''}
+        </div>
+      </div>
+      <div class="event-actions" onclick="event.stopPropagation()">
+        <div class="icon-btn delete" onclick="deleteEvent('${ev.id}')" title="Delete">🗑</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ────────────────────────────────────────────────
+   EVENT DETAIL MODAL
+──────────────────────────────────────────────── */
+function openDetail(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  const s = getStatus(ev);
+
+  document.getElementById('dm-category').innerHTML = `
+    <span class="badge ${categoryClass(ev.category)}">${catEmoji(ev.category)} ${ev.category || 'Other'}</span>
+    <span class="status-badge ${statusClass(s)}" style="margin-left:6px">${statusLabel(s)}</span>`;
+  document.getElementById('dm-title').textContent = ev.title || 'Untitled Notice';
+  document.getElementById('dm-summary').textContent = ev.summary || ev.rawText?.slice(0,300) || '—';
+
+  const fields = [
+    { label: 'Date', value: ev.date ? formatDate(ev.date) : '—' },
+    { label: 'Time', value: ev.time || '—' },
+    { label: 'Venue', value: ev.venue || '—' },
+    { label: 'Deadline', value: ev.deadline ? formatDate(ev.deadline) : '—' },
+    { label: 'Category', value: ev.category || '—' },
+    { label: 'Added', value: ev.createdAt ? new Date(ev.createdAt).toLocaleDateString('en-IN') : '—' },
+  ];
+
+  document.getElementById('dm-grid').innerHTML = fields.map(f => `
+    <div class="detail-field">
+      <div class="detail-field-label">${f.label}</div>
+      <div class="detail-field-value">${f.value}</div>
+    </div>`).join('');
+
+  document.getElementById('dm-delete').onclick = () => { deleteEvent(id); closeDetailModal(); };
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.add('hidden');
+}
+
+function deleteEvent(id) {
+  events = events.filter(e => e.id !== id);
+  saveEvents();
+  renderEvents();
+  showToast('Notice deleted.', 'info');
+}
+
+/* ────────────────────────────────────────────────
+   DASHBOARD
+──────────────────────────────────────────────── */
+function renderDashboard() {
+  const total = events.length;
+  const urgent = events.filter(e => getStatus(e) === 'urgent').length;
+  const upcoming = events.filter(e => getStatus(e) === 'upcoming').length;
+  const expired = events.filter(e => getStatus(e) === 'expired').length;
+  const todayEvs = events.filter(e => getStatus(e) === 'today');
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-urgent').textContent = urgent;
+  document.getElementById('stat-upcoming').textContent = upcoming;
+  document.getElementById('stat-expired').textContent = expired;
+
+  // Today panel
+  const todayContainer = document.getElementById('today-items');
+  if (todayEvs.length) {
+    todayContainer.innerHTML = todayEvs.map(ev => `
+      <div class="today-item" onclick="openDetail('${ev.id}')">
+        <div class="today-item-dot" style="background:var(--accent-amber)"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.88rem;font-weight:600;">${ev.title || 'Untitled'}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">${ev.time ? ev.time + ' · ' : ''}${ev.venue || ''}</div>
+        </div>
+        <span class="badge ${categoryClass(ev.category)}" style="font-size:.68rem;">${catEmoji(ev.category)}</span>
+      </div>`).join('');
+  } else {
+    todayContainer.innerHTML = `
+      <div class="empty-state" style="padding:20px">
+        <div class="empty-icon">✨</div>
+        <div class="empty-title" style="font-size:.9rem;">All clear today!</div>
+        <div class="empty-sub" style="font-size:.78rem;">No events for today.</div>
+      </div>`;
+  }
+
+  // Urgent list
+  const urgentAll = events.filter(e => ['urgent','today'].includes(getStatus(e))).slice(0, 5);
+  document.getElementById('dash-urgent-list').innerHTML = urgentAll.length
+    ? urgentAll.map(ev => dashItem(ev, getStatus(ev) === 'urgent' ? 'var(--accent)' : 'var(--accent-amber)')).join('')
+    : `<div class="empty-state" style="padding:30px"><div class="empty-icon">🎉</div><div class="empty-title" style="font-size:.88rem;">Nothing urgent!</div></div>`;
+
+  // Upcoming this week
+  const now = new Date(); now.setHours(0,0,0,0);
+  const week = new Date(now); week.setDate(week.getDate() + 7);
+  const weekEvs = events.filter(e => {
+    const d = parseDate(e.date);
+    return d && d >= now && d <= week;
+  }).slice(0, 5);
+
+  document.getElementById('dash-upcoming-list').innerHTML = weekEvs.length
+    ? weekEvs.map(ev => dashItem(ev, 'var(--primary)')).join('')
+    : `<div class="empty-state" style="padding:30px"><div class="empty-icon">📭</div><div class="empty-title" style="font-size:.88rem;">Nothing this week yet</div></div>`;
+}
+
+function dashItem(ev, dotColor) {
+  return `<div class="dash-item" onclick="openDetail('${ev.id}')">
+    <div class="dash-item-dot" style="background:${dotColor}"></div>
+    <div class="dash-item-text">
+      <div class="dash-item-name">${ev.title || 'Untitled'}</div>
+      <div class="dash-item-sub">${ev.date ? formatDate(ev.date) : ''}${ev.venue ? ' · ' + ev.venue : ''}</div>
+    </div>
+    <span class="badge ${categoryClass(ev.category)}" style="font-size:.68rem;">${catEmoji(ev.category)}</span>
+  </div>`;
+}
+
+/* ────────────────────────────────────────────────
+   BADGES
+──────────────────────────────────────────────── */
+function updateBadges() {
+  const total = events.length;
+  const urgent = events.filter(e => getStatus(e) === 'urgent').length;
+  const today = events.filter(e => getStatus(e) === 'today').length;
+  document.getElementById('nav-badge-dash').textContent = total;
+  document.getElementById('nav-badge-events').textContent = total;
+  document.getElementById('badge-urgent').textContent = urgent;
+  document.getElementById('badge-today').textContent = today;
+}
+
+/* ────────────────────────────────────────────────
+   CALENDAR
+──────────────────────────────────────────────── */
+function renderCalendar() {
+  const now = new Date();
+  if (!calendarYear) calendarYear = now.getFullYear();
+  if (calendarMonth === undefined) calendarMonth = now.getMonth();
+
+  const firstDay = new Date(calendarYear, calendarMonth, 1);
+  const lastDay  = new Date(calendarYear, calendarMonth + 1, 0);
+  const startDow = firstDay.getDay(); // 0=Sun
+  const daysInMonth = lastDay.getDate();
+
+  const monthName = firstDay.toLocaleDateString('en-IN', { month:'long', year:'numeric' });
+
+  const wrapper = document.getElementById('cal-wrapper');
+  wrapper.innerHTML = `
+    <div class="calendar-header">
+      <button class="icon-btn" onclick="calPrev()" title="Previous month">←</button>
+      <div class="calendar-month-title">${monthName}</div>
+      <button class="icon-btn" onclick="calNext()" title="Next month">→</button>
+    </div>
+    <div class="calendar-grid" id="cal-grid">
+      ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="cal-day-header">${d}</div>`).join('')}
+    </div>`;
+
+  const grid = document.getElementById('cal-grid');
+
+  // Blank cells before first day
+  for (let i = 0; i < startDow; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    grid.appendChild(cell);
+  }
+
+  const todayD = now.getDate(), todayM = now.getMonth(), todayY = now.getFullYear();
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    const isToday = d === todayD && calendarMonth === todayM && calendarYear === todayY;
+    cell.className = 'cal-day' + (isToday ? ' today-cell' : '');
+
+    // Find events on this day
+    const cellDate = new Date(calendarYear, calendarMonth, d);
+    const dayEvs = events.filter(ev => {
+      const ed = parseDate(ev.date);
+      if (!ed) return false;
+      return ed.getFullYear() === calendarYear && ed.getMonth() === calendarMonth && ed.getDate() === d;
+    });
+
+    const dotsHtml = dayEvs.slice(0, 3).map(ev => {
+      const s = getStatus(ev);
+      return `<div class="cal-event-dot ${s}" onclick="openDetail('${ev.id}');event.stopPropagation()" title="${ev.title || 'Event'}">${catEmoji(ev.category)} ${(ev.title || '').slice(0,14)}</div>`;
+    }).join('');
+
+    const more = dayEvs.length > 3 ? `<div style="font-size:.65rem;color:var(--text-muted);padding:1px 5px;">+${dayEvs.length - 3} more</div>` : '';
+
+    cell.innerHTML = `<div class="cal-day-num">${d}</div><div class="cal-events">${dotsHtml}${more}</div>`;
+    grid.appendChild(cell);
+  }
+
+  // Fill trailing cells
+  const totalCells = startDow + daysInMonth;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for (let i = 0; i < trailing; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    grid.appendChild(cell);
+  }
+}
+
+function calPrev() {
+  calendarMonth--;
+  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+  renderCalendar();
+}
+
+function calNext() {
+  calendarMonth++;
+  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  renderCalendar();
+}
+
+/* ────────────────────────────────────────────────
+   TOASTS
+──────────────────────────────────────────────── */
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .4s'; setTimeout(() => toast.remove(), 400); }, 3500);
+}
+
+/* ────────────────────────────────────────────────
+   DEMO DATA (seeded on first visit)
+──────────────────────────────────────────────── */
+function seedDemoData() {
+  if (events.length > 0) return;
+  const today = new Date();
+  const fmt = (d) => d.toISOString().split('T')[0];
+  const addDays = (n) => { const d = new Date(today); d.setDate(d.getDate() + n); return d; };
+
+  events = [
+    {
+      id: uid(), title: 'Annual Tech Fest TECHNOVA', date: fmt(addDays(2)),
+      time: '10:00 AM – 5:00 PM', venue: 'Main Auditorium', category: 'Event',
+      deadline: fmt(addDays(1)), summary: 'Annual inter-college tech fest with hackathon, robotics, and quiz competitions. Register before the deadline tomorrow!',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: uid(), title: 'Machine Learning Workshop', date: fmt(addDays(5)),
+      time: '9:30 AM – 4:00 PM', venue: 'CS Seminar Hall, Block C', category: 'Workshop',
+      deadline: fmt(addDays(3)), summary: 'Two-day hands-on workshop on ML and Deep Learning by the CS Department. Bring your laptops!',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: uid(), title: 'IAT-2 Mathematics', date: fmt(addDays(10)),
+      time: '10:00 AM', venue: 'Room 201', category: 'Exam',
+      deadline: null, summary: 'Internal Assessment Test 2 for Mathematics. No electronic devices allowed; bring your ID card.',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: uid(), title: 'Inter-college Cricket Match', date: fmt(today),
+      time: '8:00 AM', venue: 'Main Ground', category: 'Sports',
+      deadline: null, summary: 'Our team plays today! All members must arrive by 7:30 AM. Spectators welcome, come cheer the team!',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: uid(), title: 'Library Card Renewal Notice', date: fmt(addDays(-3)),
+      time: null, venue: 'Central Library', category: 'Notice',
+      deadline: fmt(addDays(-1)), summary: 'Library cards for 3rd-year students expired last week. Visit the library to renew before the end of this semester.',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: uid(), title: 'Cultural Fest CULTURAZA', date: fmt(addDays(15)),
+      time: 'All day', venue: 'Amphitheater & Main Auditorium', category: 'Event',
+      deadline: fmt(addDays(12)), summary: 'Annual cultural extravaganza with dance, music, drama, fashion show, and comedy. Entry is free for all students!',
+      createdAt: new Date().toISOString()
+    }
+  ];
+  saveEvents();
+}
+
+seedDemoData();
+
+/* ────────────────────────────────────────────────
+   AI ASSISTANT CHAT
+──────────────────────────────────────────────── */
+let chatHistory = [];
+
+function buildEventsContext() {
+  if (!events.length) return 'No events saved yet.';
+  const today = new Date(); today.setHours(0,0,0,0);
+  return events.map(ev => {
+    const s = getStatus(ev);
+    return `- [${s.toUpperCase()}] ${ev.title || 'Untitled'} | Category: ${ev.category || 'Other'} | Date: ${ev.date ? formatDate(ev.date) : 'Unknown'} | Time: ${ev.time || 'N/A'} | Venue: ${ev.venue || 'N/A'} | Deadline: ${ev.deadline ? formatDate(ev.deadline) : 'N/A'} | Summary: ${ev.summary || ''}`;
+  }).join('\n');
+}
+
+function chatTimestamp() {
+  return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function appendBubble(role, text) {
+  const container = document.getElementById('chat-messages');
+  const isUser = role === 'user';
+  const div = document.createElement('div');
+  div.className = `chat-bubble ${role}`;
+  div.innerHTML = `
+    <div class="chat-avatar ${role}">${isUser ? '🧑' : '✦'}</div>
+    <div>
+      <div class="chat-text">${text.replace(/\n/g, '<br/>')}</div>
+      <div class="chat-time">${chatTimestamp()}</div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function appendTyping() {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ai';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="chat-avatar ai">✦</div>
+    <div>
+      <div class="chat-text" style="padding:10px 14px;">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function sendSuggestion(el) {
+  document.getElementById('chatInput').value = el.textContent;
+  sendChat();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  const key = getApiKey();
+  if (!key) { showToast('Set your Gemini API key first!', 'error'); openApiModal(); return; }
+
+  input.value = '';
+  appendBubble('user', question);
+
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+
+  // Timer bubble
+  const timerBubble = appendTimerBubble();
+  let secs = 0;
+  const timer = setInterval(() => {
+    secs++;
+    const el = document.getElementById('ai-timer');
+    if (el) el.textContent = (secs < 20 ? 'Thinking... ' : 'Still working... ') + secs + 's';
+  }, 1000);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+  const ctx = events.length
+    ? events.slice(0,8).map(ev => getStatus(ev).toUpperCase() + ': ' + (ev.title||'?') + ' ' + (ev.date ? formatDate(ev.date) : '')).join(', ')
+    : 'No events.';
+
+  const prompt = 'Today: ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) + '. Events: ' + ctx + '. Question: ' + question + '. Reply in 2-3 sentences, friendly, use emojis.';
+
+  try {
+    const res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + key,
+      {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 120, topP: 0.8, topK: 20 }
+        })
+      }
+    );
+
+    clearInterval(timer); clearTimeout(timeoutId); timerBubble.remove();
+
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error ? e.error.message : 'Error ' + res.status); }
+
+    const data = await res.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
+    appendBubble('ai', reply);
+
+  } catch (err) {
+    clearInterval(timer); clearTimeout(timeoutId); timerBubble.remove();
+    if (err.name === 'AbortError') {
+      appendBubble('ai', 'Timed out after 45s. Free tier can be slow during peak hours - try again!');
+    } else {
+      appendBubble('ai', 'Error: ' + err.message);
+    }
+  } finally {
+    btn.disabled = false;
+    input.focus();
+  }
+}
+
+function appendTimerBubble() {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ai';
+  const inner = document.createElement('div');
+  inner.className = 'chat-text';
+  inner.style.cssText = 'padding:10px 16px;font-size:.85rem;';
+  const span = document.createElement('span');
+  span.id = 'ai-timer';
+  span.textContent = 'Thinking... 0s';
+  inner.appendChild(span);
+  const avatar = document.createElement('div');
+  avatar.className = 'chat-avatar ai';
+  avatar.textContent = '✦';
+  const wrap = document.createElement('div');
+  wrap.appendChild(inner);
+  div.appendChild(avatar);
+  div.appendChild(wrap);
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function appendStreamBubble() { return document.createElement('div'); }
+function updateStreamBubble() {}
+
+
+// Override navigate to init chat when switching to assistant page
+const _origNavigate = navigate;
+window.navigate = function(el, page) {
+  _origNavigate(el, page);
+  if (page === 'assistant') initChat();
+};
+
+/* ────────────────────────────────────────────────
+   INIT
+──────────────────────────────────────────────── */
+updateBadges();
+renderDashboard();
+</script>
+</body>
+</html>
